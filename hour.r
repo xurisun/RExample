@@ -1,4 +1,4 @@
-setwd('D:/æˆ‘çš„æ–‡æ¡£/æ–‡æ¡£/å¤æ—¦å¤§å­¦/å¤§å››/ä¸“é¢˜è®²åº§ä¸‹/Project1');
+setwd('D:/ÎÒµÄÎÄµµ/ÎÄµµ/¸´µ©´óÑ§/´óËÄ/×¨Ìâ½²×ùÏÂ/Project1');
 Hour = read.table("hour.csv", header=T, sep=",", na.strings="?");
 Hour = na.omit(Hour);
 col_num = ncol(Hour);
@@ -28,54 +28,61 @@ HourFix["cnt"] = Hour[,17];
 ##############################################################
 ansMatrix = matrix(nrow = data_num, ncol = 2);
 #registered
-lm.fit=lm(registered~(temp+atemp+hum+windspeed
-                      +season+year+hour
-                      +holiday+weekday+weather
-                      +I(temp^2)+I(atemp^2)+I(hum^2)+I(windspeed^2)
-                      +I(temp^3)+I(hum^3)
-                      +I(temp^4)
-                      +season:temp
-                      +hour:temp+hour:hum
-                      +temp:atemp
-                      +hum:windspeed
-                  )
+lm.fit1=lm(registered~(temp+atemp+hum+windspeed
+                  +season+year+month+hour
+                  +holiday+weekday+workingday+weather)
+          *
+            (temp+atemp+hum+windspeed
+             +season+year+month+hour
+             +holiday+weekday+workingday+weather)
+          -atemp:windspeed-atemp:year-hum:holiday
+          +I(temp^2)+I(atemp^2)+I(hum^2)+I(windspeed^2)
+          +I(temp^3)+I(atemp^3)+I(hum^3)
+          +I(temp^4)+I(hum^4)
           ,data=HourFix);
 
-summary(lm.fit);
-parameters = coef(lm.fit);
+summary(lm.fit1);
+parameters = coef(lm.fit1);
 
-tempAns = predict(lm.fit);
+tempAns = predict(lm.fit1);
 tempAns = as.matrix(tempAns);
 ansMatrix[,1] = tempAns;
 ##############################################################
 #casual
-lm.fit=lm(casual~(temp+atemp+hum+windspeed
-                      +season+year+hour
-                      +holiday+weekday+weather
-                      +I(temp^2)+I(atemp^2)+I(hum^2)+I(windspeed^2)
-                      +I(temp^3)+I(hum^3)
-                      +I(temp^4)
-                      +season:temp
-                      +hour:temp+hour:hum
-                      +temp:atemp
-)
+lm.fit2=lm(casual~(temp+atemp+hum+windspeed
+               +season+year+month+hour
+               +holiday+weekday+workingday+weather)
+          *
+            (temp+atemp+hum+windspeed
+             +season+year+month+hour
+             +holiday+weekday+workingday+weather)
+          -atemp:windspeed-atemp:year-hum:holiday
+          +I(temp^2)+I(atemp^2)+I(hum^2)+I(windspeed^2)
+          +I(temp^3)+I(atemp^3)+I(hum^3)
+          +I(temp^4)+I(hum^4)
           ,data=HourFix);
 
-summary(lm.fit);
-parameters = coef(lm.fit);
+summary(lm.fit2);
+parameters = coef(lm.fit2);
 
-tempAns = predict(lm.fit);
+tempAns = predict(lm.fit2);
 tempAns = as.matrix(tempAns);
 ansMatrix[,2] = tempAns;
 ##############################################################
-rmse = 0;
-error = 0;
-for (i in 1: data_num) {
-  diff = HourFix[i,]$cnt - (ansMatrix[i,1] + ansMatrix[i,2]);
-  rmse = rmse + diff ^ 2;
-  error = error + abs(diff);
-}
-rmse = as.numeric(sqrt(rmse / data_num));
-error = as.numeric(error / data_num);
-
-rm(Hour, lm.fit, diff, i, tempAns);
+lm.fit=lm(cnt~(temp+atemp+hum+windspeed
+                  +season+year+month+hour
+                  +holiday+weekday+workingday+weather)
+              *
+              (temp+atemp+hum+windspeed
+                 +season+year+month+hour
+                 +holiday+weekday+workingday+weather)
+              -atemp:windspeed-atemp:year-hum:holiday
+              +I(temp^2)+I(atemp^2)+I(hum^2)+I(windspeed^2)
+              +I(temp^3)+I(atemp^3)+I(hum^3)
+              +I(temp^4)+I(hum^4)
+          ,data=HourFix);
+#sink("record.lis");
+anova(lm.fit);
+#sink();
+summary(lm.fit);
+##############################################################
