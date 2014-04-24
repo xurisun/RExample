@@ -6,6 +6,8 @@ data_num = length(Hour[,1]);
 colname = colnames(Hour);
 names(Hour);
 
+corelation = cor(Hour[,3:14]);
+
 ##############################################################
 # fix the dataset
 HourFix = Hour[,c(11:14)];
@@ -22,12 +24,20 @@ HourFix["weather"] = as.factor(Hour$weathersit);
 HourFix["casual"] = Hour[,15];
 HourFix["registered"] = Hour[,16];
 HourFix["cnt"] = Hour[,17];
+
 ##############################################################
 ansMatrix = matrix(nrow = data_num, ncol = 2);
 #registered
 lm.fit=lm(registered~(temp+atemp+hum+windspeed
                       +season+year+hour
                       +holiday+weekday+weather
+                      +I(temp^2)+I(atemp^2)+I(hum^2)+I(windspeed^2)
+                      +I(temp^3)+I(hum^3)
+                      +I(temp^4)
+                      +season:temp
+                      +hour:temp+hour:hum
+                      +temp:atemp
+                      +hum:windspeed
                   )
           ,data=HourFix);
 
@@ -40,8 +50,14 @@ ansMatrix[,1] = tempAns;
 ##############################################################
 #casual
 lm.fit=lm(casual~(temp+atemp+hum+windspeed
-                      +season+year+month+hour
+                      +season+year+hour
                       +holiday+weekday+weather
+                      +I(temp^2)+I(atemp^2)+I(hum^2)+I(windspeed^2)
+                      +I(temp^3)+I(hum^3)
+                      +I(temp^4)
+                      +season:temp
+                      +hour:temp+hour:hum
+                      +temp:atemp
 )
           ,data=HourFix);
 
