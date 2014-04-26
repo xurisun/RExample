@@ -1,0 +1,239 @@
+\documentclass{article}[]
+\usepackage{epsfig}
+\usepackage{psfig}
+\usepackage{graphicx}
+\usepackage{url}
+
+\begin{document}
+
+\title{{\bf Multiple Linear Regression on Bicycle Rental Dataset}\\ }
+
+\author{Zhu Chengchun\\ \vspace{0.5cm}\\
+ 1030201009}
+
+\date{}
+\maketitle
+\begin{abstract}
+As a bicycle rental enterprise, it's critically essential to have a general idea of the bicycle rental information. This paper proposes a linear model based on the properties of the data, attempting to mine the relations between these properties and the outcoming rental amount. Furthermore, the predictions will help the company efficiently organize the positions of bicycles, thus making full use of resources.
+\end{abstract}
+
+\section{Introduction}
+\label{intro}
+\paragraph{}
+The dataset is consisted of properties that describes the rental of bicycles. It records the year, month and day of each rental. Also the data records if the day is a working day, a weekday or a holiday that helps us better building the model. The weather information like weather type, temperature, wind speed and humidity is also recorded to provide us with vital information. The outcome is consisted of three parts: the number of casual, registered and total rental count.
+\paragraph{}
+We use a linear regression model to explain the outcome with the properties. The R language is used for the model training and predictor evaluating. Moreover, we will also try to extend the linear model to a high-level one, exploiting relationship within predictors.
+
+\section{Related Work}
+\label{related_work}
+\subsection{Linear Regression Model}
+\label{linear_regression_model}
+\paragraph{}
+The simple linear regression model has the form:
+\begin{center}
+$$y = \beta_0 + \beta_1 x$$
+\end{center}
+which assumes an approximatively linear relation between x and y. $\beta_0$ is the intercept and $\beta_1$ is the slope. As we get the value of these parameters, the linear model is achieved and can be used for prediction and inference. A common approach for reaching these parameters is called the least square method, which minimizes the Residual Sum of Squares(RSS) to get the value of the parameters. The multiple linear regression model extends the single variable x to a vector \textbf{x}, which can be used to express models with more predictors. In our paper, we adopt the multiple linear regression model for the given dataset.
+\subsection{the R Language}
+\label{the_r_language}
+\paragraph{}
+The R language is widely used among statisticians and data miners for developing statistical software and data analysis. It provides convenient interface and tools for data mining and visualization. In our paper, we use R to fit the model, without the need to implement a least square linear regression in our own. Also it tells us interesting conclusions on predictors and relationship among them, which simplifies our work to a certain degree.
+
+\section{Model Presentation}
+\label{model_presentation}
+\paragraph{}
+Our first basic multiple linear model is presented by the following formula:
+\begin{center}
+$$\textbf{casual} = \beta_0+\beta_1\textbf{temp}+\beta_2\textbf{atemp}+\beta_3\textbf{hum}+\beta_4\textbf{windspeed}
++\textbf{qualitatives}$$
+\end{center}
+As some predictors like season, year, etc are qualitative predictors, we should make changes on them.
+\begin{center}
+$$\textbf{season} = \beta_{51}\textbf{season1}+\beta_{52}\textbf{season2}+\beta_{53}\textbf{season3}$$
+\end{center}
+\paragraph{}
+Other qualitative predictors can also be changed with more variables. If it has n types, then we use n-1 variables. Fortunately, R language has done that for us, without manually extract them. We can use as.factor() to change a quantitative predictor to a qualitative one.
+
+\begin{table}
+\caption{Predictor Table of Response "Cnt"}
+\centering
+\begin{tabular}{c|c|c|c|c|c|c}
+\hline
+{\bf Predictor}&{\bf Df}&{\bf Sum Sq}&{\bf Mean Sq}&{\bf F value}&{\bf Pr($>$ F)}&{\bf s}\\
+\hline
+temp          &1  &93677759 &93677759 &9050.7568 &$<$ 2.2e-16 &***\\
+atemp         &1     &30698    &30698    &2.9659   &0.08505 &.\\
+hum           &1  &50754788 &50754788 &4903.7172 &$<$ 2.2e-16 &***\\
+windspeed     &1    &415517   &415517   &40.1455 &2.415e-10 &***\\
+season        &3  &15990144  &5330048  &514.9671 &$<$ 2.2e-16 &***\\
+year          &1  &24851758 &24851758 &2401.0738 &$<$ 2.2e-16 &***\\
+month        &11   &8643166   &785742   &75.9152 &$<$ 2.2e-16 &***\\
+hour         &23 &193147464  &8397716  &811.3525 &$<$ 2.2e-16 &***\\
+holiday       &1    &298515   &298515   &28.8413 &7.957e-08 &***\\
+weekday       &6    &414305    &69051    &6.6714 &4.582e-07 &***\\
+weather       &3   &4208731  &1402910  &135.5434 &$<$ 2.2e-16 &***\\
+\hline
+\end{tabular}
+\label{table:predictor_table1}
+\end{table}
+
+\subsection{Is there a relationship between each predictor and response?}
+\paragraph{}
+From Table \ref{table:predictor_table1} we can conclude that all predictors except atemp have relationship with the rental count, because the p-value is small enough, where at the same time the F statistic is large enough to convince us that there's a relation between each predictor and the response. Similar conclusions can be drawn on the rest responses: "casual" and "registered". We will mainly analyze the "cnt" response in our paper.
+
+\subsection{How strong is the relationship between predictors and response?}
+\paragraph{}
+The RSE for this simple model is 85.42. To take the predictor "temp" as an instance, the error is only 85.42 / 93677759, which is a rather small value. This tells us that the predictor has a very strong relationship with the response "cnt". Similar conclusion can also be drawn by calculating each predictor's error rate. Another estimator to valuate the relationship is the R-squared estimator. In our model, the value is 0.6815, which means that 68.15\% of the
+relationship can be explained by the model. It's also a strong evidence that the predictors have strong relationship with the response.
+
+\subsection{Which media contribute to response?}
+\paragraph{}
+We evaluate the p-value for all the predictors. Evidently all but atemp contributes to the response cnt. The atemp predictor has a weak relationship in the response cnt, but actually it has relationship with response registered. That's the reason we should consider it as well.
+
+\subsection{How accurately can we estimate the effect of each medium on sales?}
+\paragraph{}
+We can construct 95\% confidence intervals (2*SE($\beta$)) for each predictor:
+
+\begin{table}
+\caption{Predictor Interval}
+\centering
+\begin{tabular}{c|c|c|c}
+\hline
+{\bf Predictor}&{\bf Estimated Value}&{\bf Standard Error}&{\bf Interval}\\
+\hline
+(Intercept)  &-83.630      &6.633 &(-96.63, -70.62)\\
+temp         &116.384     &29.513 &(58.53, 174.23)\\
+atemp        &127.975     &30.624 &(67.94, 188.00)\\
+hum          &-82.802      &5.554 &(-93.68, -71.91)\\
+windspeed    &-29.167      &7.052 &(-42.98, -15.34)\\
+\hline
+\end{tabular}
+\label{table:predictor_interval_table}
+\end{table}
+
+\paragraph{}
+Other predictors are qualitative predictors, which are resolved so we do not list them in Table \ref{table:predictor_interval_table} due to limited page number.
+
+\subsection{How accurately can we predict future sales?}
+\paragraph{}
+We can analyze each predictor's prediction and confidence interval as below in Table \ref{table:confidence_interval_table} and Table \ref{table:prediction_interval_table}:
+\begin{table}
+\caption{Predictor Temperature's Confidence Interval}
+\centering
+\begin{tabular}{c|c|c|c}
+\hline
+{\bf Predictor Value}&{\bf fit}&{\bf lwr}&{\bf upr}\\
+\hline
+0.2 &83.81785 &69.64362  &97.99208\\
+0.25 &89.63706 &75.92254 &103.35159\\
+0.3 &95.45627 &81.59986 &109.31268\\
+\hline
+\end{tabular}
+\label{table:confidence_interval_table}
+\end{table}
+
+\begin{table}
+\caption{Predictor Temperature's Prediction Interval}
+\centering
+\begin{tabular}{c|c|c|c}
+\hline
+{\bf Predictor Value}&{\bf fit}&{\bf lwr}&{\bf upr}\\
+\hline
+0.2 &83.81785 &-116.0986 &283.7343\\
+0.25 &89.63706 &-110.2473 &289.5215\\
+0.3 &95.45627 &-104.4379 &295.3505\\
+\hline
+\end{tabular}
+\label{table:prediction_interval_table}
+\end{table}
+
+\paragraph{}
+We set all but the predictor "temp" to be a constant value, to find the accuracy of the single predictor. We record observations when the temperature is 0.2, 0.25 and 0.3. As shown in the two tables Table \ref{table:confidence_interval_table} and Table \ref{table:prediction_interval_table}, we can see that the prediction interval is normally larger than the confidence interval.
+
+\subsection{Is the relationship linear?}
+\paragraph{}
+To answer this question, we should change our model. The model is now changed to: 
+\begin{center}
+$$\textbf{cnt} = \beta_0+\textbf{temp}+\textbf{atemp}+\textbf{hum}+\textbf{windspeed}+\textbf{qualitatives}$$
+\end{center}
+\paragraph{}
+where
+\begin{center}
+$$\textbf{temp} = \beta_1\textbf{temp}+\beta_2\textbf{temp}^2+...$$
+\end{center}
+\paragraph{}
+After evaluating th p-value of the high-level predictors, we conclude a model that fits the current dataset:
+\begin{center}
+$$\textbf{cnt} = ...+\beta_{12}\textbf{temp}^2+\beta_{22}\textbf{atemp}^2+\beta_{32}\textbf{hum}^2+\beta_{42}\textbf{windspeed}^2$$
+$$+\beta_{13}\textbf{temp}^3+\beta_{23}\textbf{atemp}^3+\beta_{33}\textbf{hum}^3+\beta_{14}\textbf{temp}^4+\beta_{34}\textbf{hum}^4$$
+\end{center}
+\paragraph{}
+The estimators for these nonlinear predictors are shown in Table \ref{table:high-level_predictors}: 
+\begin{table}
+\caption{High-level Predictors}
+\centering
+\begin{tabular}{c|c|c|c|c|c|c}
+\hline
+{\bf Predictor}&{\bf Df}&{\bf Sum Sq}&{\bf Mean Sq}&{\bf F value}&{\bf Pr($>$ F)}&{\bf s}\\
+\hline
+I(${temp}^2$)             &1    &108967   &108967    &44.9184 &2.121e-11 &***\\
+I($atemp^2$)            &1    &247193   &247193   &101.8980 &$<$ 2.2e-16 &***\\
+I($hum^2$)              &1    &534827   &534827   &220.4668 &$<$ 2.2e-16 &***\\
+I($windspeed^2$)        &1    &360925   &360925   &148.7808 &$<$ 2.2e-16 &***\\
+I($temp^3$)             &1   &3392530  &3392530  &1398.4703 &$<$ 2.2e-16 &***\\
+I($atemp^3$)            &1     &41143    &41143    &16.9601 &3.836e-05 &***\\
+I($hum^3$)              &1    &183510   &183510    &75.6466 &$<$ 2.2e-16 &***\\
+I($temp^4$)             &1    &721400   &721400   &297.3757 &$<$ 2.2e-16 &***\\
+I($hum^4$)              &1     &39968    &39968    &16.4755 &4.951e-05 &***\\
+\hline
+\end{tabular}
+\label{table:high-level_predictors}
+\end{table}
+\paragraph{}
+From Table \ref{table:high-level_predictors} we can see that all these predictors have strong relationship with the response. We do not include higher=level predictors to avoid overfitting. These statistics show that the model is not linear.
+
+\subsection{Is there synergy among the predictors?}
+\paragraph{}
+We also take synergy into our consideration and change our model to:
+\begin{center}
+$$\textbf{cnt} = ...+\sum_{i=1}^n \sum_{j=1, j\not=i}^n {x}_i*{x}_j$$
+\end{center}
+\paragraph{}
+There are altogether ${C}_n^2$ second-order predictors and we only show a partition of them in Table \ref{table:second-order_predictors}. After evaluating these predictors, we finally build our model without predictors that show strong relationship with the response. Statistics show that there exists relationship between many predictors, such as the temperature and the average temperature shown in Figure \ref{fig:interaction}.
+\begin{table}
+\caption{Second-order Predictors}
+\centering
+\begin{tabular}{c|c|c|c|c|c}
+\hline
+{\bf Predictor}&{\bf Sum Sq}&{\bf Mean Sq}&{\bf F value}&{\bf Pr($>$ F)}&{\bf s}\\
+\hline
+temp:atemp                &596399   &593699   &245.8478 &$<$ 2.2e-16 &***\\
+temp:hum                 &4494768  &4494768  &1852.8350 &$<$ 2.2e-16 &***\\
+temp:windspeed             &93125    &93125    &38.3879 &5.937e-10 &***\\
+temp:season               &153641    &51214    &21.1113 &1.209e-13 &***\\
+temp:year                &1608118  &1608118   &662.8992 &$<$ 2.2e-16 &***\\
+temp:month               &953552    &86687    &35.7340 &$<$ 2.2e-16 &***\\
+temp:hour              &18458638   &802549   &330.8273 &$<$ 2.2e-16 &***\\
+temp:holiday              &140533   &140533    &57.9307 &2.862e-14 &***\\
+temp:weekday             &1909379   &318230   &131.1808 &$<$ 2.2e-16 &***\\
+temp:weather              &102005    &34002    &14.0162 &4.020e-09 &***\\
+\hline
+\end{tabular}
+\label{table:second-order_predictors}
+\end{table}
+\begin{figure}
+\centering
+\includegraphics[width=0.50\textwidth]{interaction.png}
+\caption{Interaction between temp and atemp}
+\label{fig:interaction}
+\end{figure}
+
+\section{Experiments and Statistics}
+\paragraph{}
+
+%ACKNOWLEDGEMENTS are optional
+\section{Acknowledgements}
+People you might want to acknowledge.
+
+\end{document}
+
