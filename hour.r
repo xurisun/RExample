@@ -1,4 +1,4 @@
-setwd('D:/ÎÒµÄÎÄµµ/ÎÄµµ/¸´µ©´óÑ§/´óËÄ/×¨Ìâ½²×ùÏÂ/Project1');
+setwd('D:/æˆ‘çš„æ–‡æ¡£/æ–‡æ¡£/å¤æ—¦å¤§å­¦/å¤§å››/ä¸“é¢˜è®²åº§ä¸‹/Project1');
 Hour = read.table("hour.csv", header=T, sep=",", na.strings="?");
 Hour = na.omit(Hour);
 col_num = ncol(Hour);
@@ -24,6 +24,27 @@ HourFix["weather"] = as.factor(Hour$weathersit);
 HourFix["casual"] = Hour[,15];
 HourFix["registered"] = Hour[,16];
 HourFix["cnt"] = Hour[,17];
+
+lm.fit3=lm(cnt~(temp+atemp+hum+windspeed
+                       +season+year+month+hour
+                       +holiday+weekday+workingday+weather)
+           ,data=HourFix);
+anova(lm.fit3);
+confint(lm.fit3);
+summary(lm.fit3);
+predict(lm.fit3,data.frame(temp=(c(0.2,0.25,0.3)),
+                           atemp=(0.25), 
+                            hum=(0.5), 
+                            windspeed=(0.3),
+                           season=as.factor(4),
+                           year=as.factor(1),
+                           month=as.factor(12),
+                           holiday=as.factor(1),
+                           hour=as.factor(23),
+                           weekday=as.factor(1),
+                           workingday=as.factor(1),
+                           weather=as.factor(1)), 
+        interval="prediction");
 
 ##############################################################
 ansMatrix = matrix(nrow = data_num, ncol = 2);
